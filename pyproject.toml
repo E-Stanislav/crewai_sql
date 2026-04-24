@@ -1,0 +1,24 @@
+[project]
+name = "sql-review-crew"
+version = "0.1.0"
+description = "MVP: multi-agent SQL review with CrewAI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "crewai>=0.130.0",
+  "crewai-tools>=0.45.0",
+  "openai>=1.50.0",
+  "psycopg[binary]>=3.2.0",
+  "pydantic>=2.8.0",
+  "python-dotenv>=1.0.1",
+]
+
+[project.scripts]
+sql-review = "sql_review_crew.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
