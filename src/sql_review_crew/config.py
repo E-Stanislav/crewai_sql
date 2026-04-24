@@ -15,11 +15,14 @@ class AppConfig:
     db_url: str | None
     temperature: float
     max_tokens: int
+    crew_verbose: bool
 
 
 def load_config(db_url_override: str | None = None) -> AppConfig:
-    load_dotenv()
+    load_dotenv(override=True)
     os.environ["CREWAI_TRACING_ENABLED"] = "false"
+    crew_verbose_raw = os.getenv("CREWAI_VERBOSE", "false").strip().lower()
+    crew_verbose = crew_verbose_raw in {"1", "true", "yes", "on"}
     return AppConfig(
         openai_base_url=os.getenv("OPENAI_BASE_URL", "http://localhost:1234/v1"),
         openai_api_key=os.getenv("OPENAI_API_KEY", "local"),
@@ -27,6 +30,7 @@ def load_config(db_url_override: str | None = None) -> AppConfig:
         db_url=db_url_override or os.getenv("DATABASE_URL"),
         temperature=float(os.getenv("TEMPERATURE", "0")),
         max_tokens=int(os.getenv("MAX_TOKENS", "4096")),
+        crew_verbose=crew_verbose,
     )
 
 

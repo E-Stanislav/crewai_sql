@@ -67,7 +67,7 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
         backstory="You are an expert SQL reviewer focused on correctness and schema consistency.",
         llm=llm,
         tools=[schema_tool],
-        verbose=False,
+        verbose=cfg.crew_verbose,
     )
 
     plan_agent = Agent(
@@ -76,7 +76,7 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
         backstory="You are a database performance engineer specialized in query plans.",
         llm=llm,
         tools=[explain_tool],
-        verbose=False,
+        verbose=cfg.crew_verbose,
     )
 
     style_agent = Agent(
@@ -84,7 +84,7 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
         goal="Improve readability and SQL best practices.",
         backstory="You are a SQL style guide reviewer for analytics and product queries.",
         llm=llm,
-        verbose=False,
+        verbose=cfg.crew_verbose,
     )
 
     aggregator_agent = Agent(
@@ -92,7 +92,7 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
         goal="Produce final structured JSON report for one SQL file.",
         backstory="You aggregate findings into concise machine-readable review output.",
         llm=llm,
-        verbose=False,
+        verbose=cfg.crew_verbose,
     )
 
     schema_task = Task(
@@ -157,7 +157,7 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
         tasks=[schema_task, plan_task, style_task, aggregator_task],
         process=Process.sequential,
         tracing=False,
-        verbose=False,
+        verbose=cfg.crew_verbose,
     )
 
     raw_output = str(crew.kickoff())
