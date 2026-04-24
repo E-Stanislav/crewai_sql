@@ -21,30 +21,30 @@ def write_file_report(reports_dir: Path, result: FileReviewResult) -> Path:
 
     improved_block = result.improved_sql.strip() if result.improved_sql else "(не требуется)"
 
-    md = f"""# SQL Review: {src_name}
+    md = f"""# Ревью SQL: {src_name}
 
-**Status:** `{result.status}`
+**Статус:** `{result.status}`
 
-## Summary
+## Краткое резюме
 
 {result.summary}
 
-## Issues
+## Замечания
 
 {issues_block}
 
-## Improved SQL
+## Улучшенный SQL
 
 ```sql
 {improved_block}
 ```
 
-## Metadata
+## Метаданные
 
-- Database: `{result.metadata.database}`
-- Explain duration (ms): `{result.metadata.explain_duration_ms}`
-- Estimated cost: `{result.metadata.estimated_cost}`
-- Query hash: `{result.metadata.query_hash}`
+- База данных: `{result.metadata.database}`
+- Длительность EXPLAIN (мс): `{result.metadata.explain_duration_ms}`
+- Оценочная стоимость: `{result.metadata.estimated_cost}`
+- Хеш запроса: `{result.metadata.query_hash}`
 """
     out.write_text(md, encoding="utf-8")
     return out
@@ -92,22 +92,22 @@ def write_summary(reports_dir: Path, results: list[FileReviewResult], report_pat
     if not by_kind:
         by_kind = "- Проблемы не обнаружены"
 
-    md = f"""# SQL Review Summary
+    md = f"""# Сводный отчёт по SQL-ревью
 
-- Total files: **{stats.total_files}**
+- Всего файлов: **{stats.total_files}**
 - OK: **{stats.ok}**
 - WARNING: **{stats.warning}**
 - ERROR: **{stats.error}**
 
-## Top heavy queries
+## Самые тяжёлые запросы
 
 {heavy_block}
 
-## Issues by kind
+## Замечания по типам
 
 {by_kind}
 
-## Reports
+## Отчёты
 
 {chr(10).join(links) if links else '- Нет обработанных файлов'}
 """

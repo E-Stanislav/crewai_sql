@@ -97,32 +97,32 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
 
     schema_task = Task(
         description=(
-            "Analyze SQL for syntax/schema issues. Return short findings list.\n"
+            "Проанализируй SQL на синтаксические и схемные проблемы. Верни короткий список замечаний НА РУССКОМ ЯЗЫКЕ.\n"
             f"FILE: {file_path}\n"
             f"SQL:\n{sql_text}\n\n"
             f"SCHEMA_SNAPSHOT_JSON:\n{json.dumps(schema_payload, ensure_ascii=False)[:15000]}"
         ),
-        expected_output="Bulleted findings with severity and recommendation.",
+        expected_output="Список замечаний (буллеты) на русском языке с уровнем критичности и рекомендацией.",
         agent=schema_agent,
     )
 
     plan_task = Task(
         description=(
-            "Analyze potential performance issues and rewrite hints.\n"
+            "Проанализируй потенциальные проблемы производительности и предложи улучшения НА РУССКОМ ЯЗЫКЕ.\n"
             f"SQL:\n{sql_text}\n\n"
             f"EXPLAIN_JSON:\n{json.dumps(explain_payload, ensure_ascii=False)[:15000]}"
         ),
-        expected_output="Bulleted performance findings with concrete suggestions.",
+        expected_output="Список замечаний по производительности (буллеты) на русском языке с конкретными рекомендациями.",
         agent=plan_agent,
         context=[schema_task],
     )
 
     style_task = Task(
         description=(
-            "Analyze style/readability and anti-patterns (SELECT *, nested subqueries, naming, etc).\n"
+            "Проанализируй стиль/читаемость и антипаттерны (SELECT *, вложенные подзапросы, именование и т.д.) НА РУССКОМ ЯЗЫКЕ.\n"
             f"SQL:\n{sql_text}"
         ),
-        expected_output="Bulleted style findings with proposed cleanups.",
+        expected_output="Список замечаний по стилю (буллеты) на русском языке с предлагаемыми исправлениями.",
         agent=style_agent,
         context=[schema_task, plan_task],
     )
@@ -142,11 +142,12 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
     }
     aggregator_task = Task(
         description=(
-            "Aggregate all previous findings and return STRICT JSON only, without markdown.\n"
+            "Собери все замечания и верни СТРОГО JSON без markdown.\n"
             f"JSON_SCHEMA_EXAMPLE:\n{json.dumps(output_contract, ensure_ascii=False)}\n"
-            "Allowed status only: OK, WARNING, ERROR."
+            "Allowed status only: OK, WARNING, ERROR.\n"
+            "ВАЖНО: поля `summary`, `issues[].message`, `issues[].recommendation`, `improved_sql` должны быть на русском языке (SQL-код оставляй как SQL)."
         ),
-        expected_output="Strict JSON object only.",
+        expected_output="Только JSON-объект по заданной схеме; все текстовые поля — на русском языке.",
         agent=aggregator_agent,
         context=[schema_task, plan_task, style_task],
     )
@@ -195,4 +196,6 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
 
     if result.status not in {"OK", "WARNING", "ERROR"}:
         result.status = "WARNING"
+    if result.summary == "No summary provided by model.":
+        result.summary = "Модель не предоставила краткое резюме."
     return result

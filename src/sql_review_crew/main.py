@@ -30,7 +30,7 @@ def main() -> None:
 
     files = scan_sql_files(root=sql_root, pattern=args.glob, limit=args.limit)
     if not files:
-        print(f"No SQL files found in: {sql_root}")
+        print(f"SQL-файлы не найдены в: {sql_root}")
         return
 
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -49,13 +49,13 @@ def main() -> None:
             result = FileReviewResult(
                 file_path=str(file_path),
                 status="ERROR",
-                summary="Pipeline failed while reviewing this file.",
+                summary="Во время ревью файла произошла ошибка пайплайна.",
                 issues=[
                     ReviewIssue(
                         kind="other",
                         severity="high",
-                        message=f"Unhandled error: {exc}",
-                        recommendation="Check DB connectivity, model endpoint, and SQL syntax.",
+                        message=f"Необработанная ошибка: {exc}",
+                        recommendation="Проверьте подключение к БД, endpoint модели и синтаксис SQL.",
                     )
                 ],
                 improved_sql=None,
@@ -67,7 +67,7 @@ def main() -> None:
         report_paths.append(report_path)
 
     summary_path = write_summary(reports_dir=reports_dir, results=all_results, report_paths=report_paths)
-    print(f"Done. Generated {len(report_paths)} reports + summary: {summary_path}")
+    print(f"Готово. Сформировано отчётов: {len(report_paths)} + сводка: {summary_path}")
 
 
 if __name__ == "__main__":
