@@ -5,7 +5,7 @@ description = "MVP: multi-agent SQL review with CrewAI"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "crewai>=0.130.0",
+  "crewai[litellm]>=0.130.0",
   "crewai-tools>=0.45.0",
   "openai>=1.50.0",
   "psycopg[binary]>=3.2.0",

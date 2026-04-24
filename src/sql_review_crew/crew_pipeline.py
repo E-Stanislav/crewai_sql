@@ -156,11 +156,18 @@ def analyze_sql_file(file_path: Path, cfg: AppConfig) -> FileReviewResult:
         agents=[schema_agent, plan_agent, style_agent, aggregator_agent],
         tasks=[schema_task, plan_task, style_task, aggregator_task],
         process=Process.sequential,
+        tracing=False,
         verbose=False,
     )
 
     raw_output = str(crew.kickoff())
     payload = _extract_json(raw_output)
+    if not payload:
+        snippet = raw_output.strip().replace("\n", " ")[:1000]
+        raise ValueError(
+            "Не удалось распарсить JSON-ответ от review-агента. "
+            f"Фрагмент ответа: {snippet or '<пустой ответ>'}"
+        )
 
     issues = []
     for issue in payload.get("issues", []):

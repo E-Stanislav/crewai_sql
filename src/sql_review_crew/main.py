@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import traceback
 from pathlib import Path
 
 from .config import load_config
@@ -45,6 +46,9 @@ def main() -> None:
             result = analyze_sql_file(file_path=file_path, cfg=cfg)
         except Exception as exc:
             from .models import FileReviewResult, ReviewIssue, ReviewMetadata
+
+            print(f"[ERROR] {file_path}: {exc}")
+            print(traceback.format_exc())
 
             result = FileReviewResult(
                 file_path=str(file_path),

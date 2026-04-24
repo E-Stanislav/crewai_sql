@@ -19,6 +19,7 @@ class AppConfig:
 
 def load_config(db_url_override: str | None = None) -> AppConfig:
     load_dotenv()
+    os.environ["CREWAI_TRACING_ENABLED"] = "false"
     return AppConfig(
         openai_base_url=os.getenv("OPENAI_BASE_URL", "http://localhost:1234/v1"),
         openai_api_key=os.getenv("OPENAI_API_KEY", "local"),
@@ -31,7 +32,7 @@ def load_config(db_url_override: str | None = None) -> AppConfig:
 
 def build_crewai_llm(cfg: AppConfig) -> LLM:
     return LLM(
-        model=f"openai/{cfg.openai_model}",
+        model=f"{cfg.openai_model}",
         api_key=cfg.openai_api_key,
         base_url=cfg.openai_base_url,
         temperature=cfg.temperature,

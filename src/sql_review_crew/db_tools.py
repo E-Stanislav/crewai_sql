@@ -8,7 +8,7 @@ from typing import Any
 
 import psycopg
 from crewai.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
 
 @dataclass(slots=True)
@@ -34,12 +34,14 @@ class SchemaSnapshotTool(BaseTool):
     description: str = "Returns information_schema snapshot for PostgreSQL as JSON string."
     args_schema: type[BaseModel] = SchemaSnapshotInput
 
+    _db_context: DBContext = PrivateAttr()
+
     def __init__(self, db_context: DBContext):
         super().__init__()
-        self.db_context = db_context
+        self._db_context = db_context
 
     def _run(self, max_rows: int = 300) -> str:
-        if not self.db_context.enabled:
+        if not self._db_context.enabled:
             return json.dumps({"enabled": False, "reason": "DATABASE_URL not configured"}, ensure_ascii=False)
 
         query = """
@@ -50,7 +52,7 @@ class SchemaSnapshotTool(BaseTool):
         LIMIT %s;
         """
 
-        with psycopg.connect(self.db_context.db_url) as conn:
+        with psycopg.connect(self._db_context.db_url) as conn:
             with conn.cursor() as cur:
                 cur.execute(query, (max_rows,))
                 rows = cur.fetchall()
@@ -72,12 +74,14 @@ class ExplainTool(BaseTool):
     description: str = "Runs EXPLAIN (FORMAT JSON) for a SQL statement in PostgreSQL."
     args_schema: type[BaseModel] = ExplainInput
 
+    _db_context: DBContext = PrivateAttr()
+
     def __init__(self, db_context: DBContext):
         super().__init__()
-        self.db_context = db_context
+        self._db_context = db_context
 
     def _run(self, sql: str, analyze: bool = False) -> str:
-        if not self.db_context.enabled:
+        if not self._db_context.enabled:
             return json.dumps({"enabled": False, "reason": "DATABASE_URL not configured"}, ensure_ascii=False)
 
         explain_prefix = "EXPLAIN (FORMAT JSON"
@@ -86,7 +90,7 @@ class ExplainTool(BaseTool):
         explain_prefix += ") "
 
         start = time.perf_counter()
-        with psycopg.connect(self.db_context.db_url) as conn:
+        with psycopg.connect(self._db_context.db_url) as conn:
             with conn.cursor() as cur:
                 cur.execute(explain_prefix + sql)
                 result = cur.fetchone()
